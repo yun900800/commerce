@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import ReCaptcha from "@/components/ReCaptcha";
+import ReCaptcha, { type ReCaptchaHandle } from "@/components/ReCaptcha";
 
 type Tab = "login" | "register";
 
@@ -59,22 +59,25 @@ export default function AuthPage() {
 function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitchTab: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const recaptchaRef = useRef<ReCaptchaHandle>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (!recaptchaToken) {
-      setError("Verifying... please try again.");
+    if (!recaptchaRef.current) {
+      setError("reCAPTCHA not ready. Please try again.");
       return;
     }
 
     setLoading(true);
 
     try {
+      // Get a fresh token at submission time
+      const recaptchaToken = await recaptchaRef.current.execute("login");
+
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,7 +131,7 @@ function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitch
         />
       </div>
 
-      <ReCaptcha action="login" onToken={setRecaptchaToken} />
+      <ReCaptcha ref={recaptchaRef} />
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
@@ -138,7 +141,7 @@ function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitch
 
       <button
         type="submit"
-        disabled={loading || !recaptchaToken}
+        disabled={loading}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? "Signing in..." : "Sign In"}
@@ -160,22 +163,25 @@ function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwi
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const recaptchaRef = useRef<ReCaptchaHandle>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (!recaptchaToken) {
-      setError("Verifying... please try again.");
+    if (!recaptchaRef.current) {
+      setError("reCAPTCHA not ready. Please try again.");
       return;
     }
 
     setLoading(true);
 
     try {
+      // Get a fresh token at submission time
+      const recaptchaToken = await recaptchaRef.current.execute("register");
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -245,7 +251,7 @@ function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwi
         />
       </div>
 
-      <ReCaptcha action="register" onToken={setRecaptchaToken} />
+      <ReCaptcha ref={recaptchaRef} />
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
@@ -255,7 +261,7 @@ function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwi
 
       <button
         type="submit"
-        disabled={loading || !recaptchaToken}
+        disabled={loading}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? "Creating account..." : "Create Account"}
