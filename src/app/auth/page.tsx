@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ReCaptcha from "@/components/ReCaptcha";
 
@@ -68,7 +68,7 @@ function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitch
     setError("");
 
     if (!recaptchaToken) {
-      setError("Please complete the reCAPTCHA verification.");
+      setError("Verifying... please try again.");
       return;
     }
 
@@ -128,7 +128,7 @@ function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitch
         />
       </div>
 
-      <ReCaptcha onVerify={setRecaptchaToken} />
+      <ReCaptcha action="login" onToken={setRecaptchaToken} />
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
@@ -138,7 +138,7 @@ function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitch
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !recaptchaToken}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? "Signing in..." : "Sign In"}
@@ -169,7 +169,7 @@ function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwi
     setError("");
 
     if (!recaptchaToken) {
-      setError("Please complete the reCAPTCHA verification.");
+      setError("Verifying... please try again.");
       return;
     }
 
@@ -245,7 +245,7 @@ function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwi
         />
       </div>
 
-      <ReCaptcha onVerify={setRecaptchaToken} />
+      <ReCaptcha action="register" onToken={setRecaptchaToken} />
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
@@ -255,7 +255,7 @@ function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwi
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !recaptchaToken}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? "Creating account..." : "Create Account"}
