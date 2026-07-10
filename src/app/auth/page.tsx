@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import ReCaptcha from "@/components/ReCaptcha";
 
 type Tab = "login" | "register";
 
@@ -12,12 +13,10 @@ export default function AuthPage() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="w-full max-w-md">
-        {/* ── Heading ──────────────────────────────────── */}
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-8">
           {tab === "login" ? "Sign In" : "Create Account"}
         </h1>
 
-        {/* ── Tab Switcher ─────────────────────────────── */}
         <div className="flex mb-6 border-b border-gray-200">
           <button
             type="button"
@@ -43,12 +42,11 @@ export default function AuthPage() {
           </button>
         </div>
 
-        {/* ── Card ─────────────────────────────────────── */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           {tab === "login" ? (
-            <LoginForm onSuccess={() => router.push("/")} />
+            <LoginForm onSuccess={() => router.push("/")} onSwitchTab={() => setTab("register")} />
           ) : (
-            <RegisterForm onSuccess={() => setTab("login")} />
+            <RegisterForm onSuccess={() => setTab("login")} onSwitchTab={() => setTab("login")} />
           )}
         </div>
       </div>
@@ -58,22 +56,29 @@ export default function AuthPage() {
 
 // ─── Login Form ─────────────────────────────────────────────
 
-function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+function LoginForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitchTab: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA verification.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, recaptchaToken }),
       });
 
       const data = await res.json();
@@ -123,6 +128,8 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
 
+      <ReCaptcha onVerify={setRecaptchaToken} />
+
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
           {error}
@@ -136,29 +143,43 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>
+
+      <p className="text-center text-sm text-gray-500">
+        Don&apos;t have an account?{" "}
+        <button type="button" onClick={onSwitchTab} className="text-blue-600 hover:text-blue-800">
+          Register
+        </button>
+      </p>
     </form>
   );
 }
 
 // ─── Register Form ──────────────────────────────────────────
 
-function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+function RegisterForm({ onSuccess, onSwitchTab }: { onSuccess: () => void; onSwitchTab: () => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA verification.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, recaptchaToken }),
       });
 
       const data = await res.json();
@@ -224,6 +245,8 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
 
+      <ReCaptcha onVerify={setRecaptchaToken} />
+
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
           {error}
@@ -237,6 +260,13 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       >
         {loading ? "Creating account..." : "Create Account"}
       </button>
+
+      <p className="text-center text-sm text-gray-500">
+        Already have an account?{" "}
+        <button type="button" onClick={onSwitchTab} className="text-blue-600 hover:text-blue-800">
+          Sign In
+        </button>
+      </p>
     </form>
   );
 }

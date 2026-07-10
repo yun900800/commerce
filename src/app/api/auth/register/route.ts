@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { scryptSync, randomBytes } from "crypto";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -17,7 +18,15 @@ function validateEmail(email: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password, recaptchaToken } = body;
+
+    // ── reCAPTCHA verification ──────────────────────────────
+    if (!recaptchaToken || !(await verifyRecaptcha(recaptchaToken))) {
+      return NextResponse.json(
+        { error: "reCAPTCHA verification failed. Please try again." },
+        { status: 400 }
+      );
+    }
 
     // ── Validation ──────────────────────────────────────────
     if (!name || typeof name !== "string" || name.trim().length === 0) {
