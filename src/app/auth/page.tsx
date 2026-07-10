@@ -1,0 +1,242 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+type Tab = "login" | "register";
+
+export default function AuthPage() {
+  const router = useRouter();
+  const [tab, setTab] = useState<Tab>("login");
+
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="w-full max-w-md">
+        {/* ── Heading ──────────────────────────────────── */}
+        <h1 className="text-2xl font-bold text-gray-900 text-center mb-8">
+          {tab === "login" ? "Sign In" : "Create Account"}
+        </h1>
+
+        {/* ── Tab Switcher ─────────────────────────────── */}
+        <div className="flex mb-6 border-b border-gray-200">
+          <button
+            type="button"
+            onClick={() => setTab("login")}
+            className={`flex-1 pb-3 text-sm font-medium transition-colors ${
+              tab === "login"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("register")}
+            className={`flex-1 pb-3 text-sm font-medium transition-colors ${
+              tab === "register"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Register
+          </button>
+        </div>
+
+        {/* ── Card ─────────────────────────────────────── */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          {tab === "login" ? (
+            <LoginForm onSuccess={() => router.push("/")} />
+          ) : (
+            <RegisterForm onSuccess={() => setTab("login")} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Login Form ─────────────────────────────────────────────
+
+function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
+
+      onSuccess();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <label htmlFor="login-email" className="block text-sm font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="login-password" className="block text-sm font-medium text-gray-700">
+          Password
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          {error}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        {loading ? "Signing in..." : "Sign In"}
+      </button>
+    </form>
+  );
+}
+
+// ─── Register Form ──────────────────────────────────────────
+
+function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Registration failed");
+        return;
+      }
+
+      onSuccess();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <label htmlFor="reg-name" className="block text-sm font-medium text-gray-700">
+          Name
+        </label>
+        <input
+          id="reg-name"
+          type="text"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your name"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="reg-email" className="block text-sm font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          id="reg-email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700">
+          Password
+        </label>
+        <input
+          id="reg-password"
+          type="password"
+          required
+          minLength={6}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="At least 6 characters"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          {error}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        {loading ? "Creating account..." : "Create Account"}
+      </button>
+    </form>
+  );
+}
