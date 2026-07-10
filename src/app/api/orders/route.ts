@@ -125,3 +125,28 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json(updated[0]);
 }
+
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return NextResponse.json({ error: "id is required" }, { status: 400 });
+  }
+
+  const orderId = Number(id);
+
+  // Delete order items first, then the order
+  await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
+
+  const deleted = await db
+    .delete(orders)
+    .where(eq(orders.id, orderId))
+    .returning();
+
+  if (deleted.length === 0) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ message: "Order deleted", id: orderId });
+}

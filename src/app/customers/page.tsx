@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { customers, orders } from "@/db/schema";
 import { eq, sql, desc, like } from "drizzle-orm";
 import Link from "next/link";
+import DeleteButton from "@/components/DeleteButton";
 
 interface CustomersPageProps {
   searchParams: Promise<{ q?: string }>;
@@ -37,7 +38,15 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Customers</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
+        <Link
+          href="/customers/new"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+        >
+          + New Customer
+        </Link>
+      </div>
 
       <form className="mb-6">
         <input
@@ -69,7 +78,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                 Total Spent
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Action
+                Actions
               </th>
             </tr>
           </thead>
@@ -92,12 +101,17 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                   ${Number(customer.totalSpent).toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <Link
-                    href={`/customers/${customer.id}`}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-3">
+                    <Link
+                      href={`/customers/${customer.id}`}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      View
+                    </Link>
+                    {Number(customer.orderCount) === 0 && (
+                      <DeleteButton id={customer.id} endpoint="/api/customers" />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

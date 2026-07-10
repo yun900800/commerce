@@ -2,9 +2,11 @@ import { db } from "@/db";
 import { orders, customers, orderItems, products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
 import OrderItemsTable from "@/components/OrderItemsTable";
 import UpdateOrderStatus from "./UpdateOrderStatus";
+import DeleteButton from "@/components/DeleteButton";
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -61,10 +63,21 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Order #{order.id}
-        </h1>
-        <OrderStatusBadge status={order.status} />
+        <div className="flex items-center gap-4">
+          <Link
+            href="/orders"
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            &larr; Back
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Order #{order.id}
+          </h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <OrderStatusBadge status={order.status} />
+          <DeleteButton id={order.id} endpoint="/api/orders" redirectTo="/orders" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

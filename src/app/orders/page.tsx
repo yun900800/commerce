@@ -3,6 +3,7 @@ import { orders, customers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
+import DeleteButton from "@/components/DeleteButton";
 
 interface OrdersPageProps {
   searchParams: Promise<{ status?: string }>;
@@ -34,7 +35,15 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Orders</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+        <Link
+          href="/orders/new"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+        >
+          + New Order
+        </Link>
+      </div>
 
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         {statuses.map((s) => (
@@ -72,7 +81,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                 Date
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Action
+                Actions
               </th>
             </tr>
           </thead>
@@ -97,12 +106,15 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     : "-"}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <Link
-                    href={`/orders/${order.id}`}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-3">
+                    <Link
+                      href={`/orders/${order.id}`}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      View
+                    </Link>
+                    <DeleteButton id={order.id} endpoint="/api/orders" />
+                  </div>
                 </td>
               </tr>
             ))}
