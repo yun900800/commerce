@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import MobileMenu from "@/components/MobileMenu";
 
 async function getSessionUser(): Promise<{ name: string } | null> {
   // This runs on the server — we read the cookie directly.
@@ -18,7 +19,7 @@ export default async function Navbar() {
   const user = await getSessionUser();
 
   return (
-    <nav className="bg-white border-b border-gray-200">
+    <nav className="bg-white border-b border-gray-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-8">
@@ -59,7 +60,8 @@ export default async function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Desktop auth */}
+          <div className="hidden sm:flex items-center gap-4">
             {user ? (
               <>
                 <span className="text-sm text-gray-500">
@@ -80,6 +82,11 @@ export default async function Navbar() {
                 Sign In
               </Link>
             )}
+          </div>
+
+          {/* Mobile hamburger */}
+          <div className="flex sm:hidden items-center">
+            <MobileMenu user={user} />
           </div>
         </div>
       </div>
