@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ReCaptcha, { type ReCaptchaHandle } from "@/components/ReCaptcha";
 
 type Tab = "login" | "register";
 
-export default function AuthPage() {
-  const router = useRouter();
+function AuthPageInner() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
   const [tab, setTab] = useState<Tab>("login");
 
   return (
@@ -44,13 +45,21 @@ export default function AuthPage() {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           {tab === "login" ? (
-            <LoginForm onSuccess={() => router.push("/")} onSwitchTab={() => setTab("register")} />
+            <LoginForm onSuccess={() => { window.location.href = redirectTo; }} onSwitchTab={() => setTab("register")} />
           ) : (
             <RegisterForm onSuccess={() => setTab("login")} onSwitchTab={() => setTab("login")} />
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthPageInner />
+    </Suspense>
   );
 }
 

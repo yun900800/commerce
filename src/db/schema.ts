@@ -9,7 +9,7 @@ export const customers = sqliteTable("customers", {
   email: text("email").notNull().unique(),
   phone: text("phone"),
   address: text("address"),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").$default(() => new Date().toISOString()),
 });
 
 // ─── Categories ──────────────────────────────────────────────
@@ -32,8 +32,8 @@ export const products = sqliteTable("products", {
   stock: integer("stock").notNull().default(0),
   imageUrl: text("image_url"),
   categoryId: integer("category_id").references(() => categories.id),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").$default(() => new Date().toISOString()),
+  updatedAt: text("updated_at").$default(() => new Date().toISOString()),
 });
 
 // ─── Orders ──────────────────────────────────────────────────
@@ -45,8 +45,8 @@ export const orders = sqliteTable("orders", {
     .references(() => customers.id),
   status: text("status").notNull().default("pending"),
   totalAmount: real("total_amount").notNull().default(0),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").$default(() => new Date().toISOString()),
+  updatedAt: text("updated_at").$default(() => new Date().toISOString()),
 });
 
 // ─── Users (Auth) ────────────────────────────────────────────
@@ -56,7 +56,7 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").$default(() => new Date().toISOString()),
 });
 
 // ─── Order Items ─────────────────────────────────────────────
