@@ -50,6 +50,12 @@ export default async function Navbar() {
               >
                 Users
               </Link>
+              <Link
+                href="/finance"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                💰 金融
+              </Link>
             </div>
           </div>
 
