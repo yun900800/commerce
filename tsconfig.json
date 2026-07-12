@@ -30,5 +30,14 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/lib/legiit/scraper.ts",
+    "src/lib/legiit/scraper-test.ts",
+    "src/lib/legiit/scraper-full.ts",
+    "src/lib/legiit/test-headed.ts",
+    "src/lib/legiit/test-playwright.ts",
+    "src/lib/legiit/test-simple.ts",
+    "src/lib/legiit/test-stealth.ts"
+  ]
 }

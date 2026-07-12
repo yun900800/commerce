@@ -57,6 +57,12 @@ export default async function Navbar() {
               >
                 💰 金融
               </Link>
+              <Link
+                href="/legiit"
+                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                ⚡ Legiit
+              </Link>
             </div>
           </div>
 
