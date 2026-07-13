@@ -13,6 +13,8 @@ const navLinks = [
   { href: "/customers", label: "Customers" },
   { href: "/users", label: "Users" },
   { href: "/finance", label: "💰 金融" },
+  { href: "/legiit", label: "⚡ Legiit" },
+  { href: "/kwork", label: "🔧 Kwork" },
 ];
 
 export default function MobileMenu({ user }: MobileMenuProps) {

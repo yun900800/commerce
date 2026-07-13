@@ -63,6 +63,12 @@ export default async function Navbar() {
               >
                 ⚡ Legiit
               </Link>
+              <Link
+                href="/kwork"
+                className="text-sm font-medium text-purple-600 hover:text-purple-800 transition-colors"
+              >
+                🔧 Kwork
+              </Link>
             </div>
           </div>
 
