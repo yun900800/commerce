@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kwork Views Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         background: #f5f5f5; padding: 20px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 24px; margin-bottom: 8px; color: #333; }
+  .subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+  .chart-card { background: white; border-radius: 12px; padding: 24px;
+                 box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+  canvas { max-height: 500px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+  th { background: #fafafa; font-weight: 600; color: #555; }
+  tr:hover { background: #f8f8f8; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .summary-card { background: white; border-radius: 10px; padding: 16px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .summary-card .label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .summary-card .value { font-size: 28px; font-weight: 700; color: #333; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>👁️ Kwork Views Tracker</h1>
+  <p class="subtitle">Last updated: 2026-07-16 | Total records: 1</p>
+
+  <div class="summary">
+    <div class="summary-card">
+      <div class="label">Total Kworks</div>
+      <div class="value">4</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Latest Total Views</div>
+      <div class="value">135</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Tracking Since</div>
+      <div class="value" style="font-size:16px">2026-07-16</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <canvas id="viewsChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>I will do HTML CSS JS web development, and respons…</th><th>I will convert Figma XD or image to clean and sema…</th><th>I will do HTML CSS website revision, bug fix, resp…</th><th>I will integrate or fix Google recaptcha to protec…</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-07-16</td><td>95</td><td>23</td><td>8</td><td>9</td><td><strong>135</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const ctx = document.getElementById('viewsChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ["2026-07-16"],
+    datasets: [    {
+      label: "I will do HTML CSS JS web development, and respons…",
+      data: [95],
+      borderColor: "#FF6384",
+      backgroundColor: "#FF638422",
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    },
+    {
+      label: "I will convert Figma XD or image to clean and sema…",
+      data: [23],
+      borderColor: "#36A2EB",
+      backgroundColor: "#36A2EB22",
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    },
+    {
+      label: "I will do HTML CSS website revision, bug fix, resp…",
+      data: [8],
+      borderColor: "#FFCE56",
+      backgroundColor: "#FFCE5622",
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    },
+    {
+      label: "I will integrate or fix Google recaptcha to protec…",
+      data: [9],
+      borderColor: "#4BC0C0",
+      backgroundColor: "#4BC0C022",
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
+      tooltip: { mode: 'index', intersect: false }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>

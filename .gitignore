@@ -47,6 +47,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# kwork raw html files (contains personal data)
+kwork-data/raw/
+kwork-data/data.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
