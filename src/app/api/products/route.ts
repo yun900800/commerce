@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq, like, desc } from "drizzle-orm";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -35,6 +36,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   const body = await request.json();
+
+  // ── Turnstile verification ──────────────────────────────
+  if (!(await verifyTurnstile(body.turnstileToken))) {
+    return NextResponse.json(
+      { error: "Turnstile verification failed. Please try again." },
+      { status: 400 }
+    );
+  }
+
   const newProduct = await db
     .insert(products)
     .values({

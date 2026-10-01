@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Turnstile, { TurnstileHandle } from "@/components/Turnstile";
 
 interface Category {
   id: number;
@@ -26,6 +27,13 @@ interface ProductFormProps {
 export default function ProductForm({ categories, initialData }: ProductFormProps) {
   const router = useRouter();
   const isEditing = !!initialData?.id;
+  // Turnstile guards product creation only; the edit form stays captcha-free so
+  // the two flows never overlap on screen. POST is the only protected endpoint.
+  const requiresTurnstile = !isEditing;
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>(
     initialData ?? {
       name: "",
@@ -38,27 +46,52 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
     }
   );
 
+  const isBlocked = requiresTurnstile && !turnstileToken;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+
+    if (requiresTurnstile && !turnstileToken) {
+      setError("Please complete the Turnstile verification first.");
+      return;
+    }
+
     const url = isEditing
       ? `/api/products?id=${initialData!.id}`
       : "/api/products";
     const method = isEditing ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData,
-        price: Number(formData.price),
-        stock: Number(formData.stock),
-        categoryId: formData.categoryId || null,
-      }),
-    });
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          price: Number(formData.price),
+          stock: Number(formData.stock),
+          categoryId: formData.categoryId || null,
+          ...(requiresTurnstile ? { turnstileToken } : {}),
+        }),
+      });
 
-    if (res.ok) {
-      router.push("/products");
-      router.refresh();
+      if (res.ok) {
+        router.push("/products");
+        router.refresh();
+        return;
+      }
+
+      const data = await res.json().catch(() => null);
+      setError(data?.error ?? "Something went wrong. Please try again.");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      // Turnstile tokens are single-use: this submission spent the current one,
+      // so re-arm the widget whether it succeeded or failed.
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
+      setIsSubmitting(false);
     }
   }
 
@@ -193,12 +226,37 @@ export default function ProductForm({ categories, initialData }: ProductFormProp
         </div>
       </div>
 
+      {requiresTurnstile && (
+        <div className="space-y-2">
+          <Turnstile ref={turnstileRef} onTokenChange={setTurnstileToken} />
+          <p className="text-xs text-gray-500">
+            {turnstileToken
+              ? "Verification complete."
+              : "Verify you are human to enable the Create Product button."}
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <p
+          role="alert"
+          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {error}
+        </p>
+      )}
+
       <div className="flex items-center gap-4">
         <button
           type="submit"
-          className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+          disabled={isBlocked || isSubmitting}
+          className="rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:bg-gray-400"
         >
-          {isEditing ? "Update Product" : "Create Product"}
+          {isSubmitting
+            ? "Saving..."
+            : isEditing
+              ? "Update Product"
+              : "Create Product"}
         </button>
         <button
           type="button"
